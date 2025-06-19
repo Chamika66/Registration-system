@@ -12,11 +12,14 @@ const {
 const authMiddleware = require('../Middleware/authMiddleware');
 const upload = require('../Middleware/uploadMiddleware');
 
+// Apply auth middleware to all routes
 router.use(authMiddleware);
-router.post('/',upload.single('photograph'), createStudent);
+
+// Routes
+router.post('/', upload.single('photograph'), createStudent);
 router.get('/', getAllStudents);
 router.get('/:id', getStudentById);
-router.put('/:id',upload.single('photograph'), updateStudent);
+router.put('/:id', upload.single('photograph'), updateStudent);
 router.delete('/:id', deleteStudent);
 
 module.exports = router;
