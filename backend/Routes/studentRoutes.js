@@ -10,12 +10,13 @@ const {
 } = require('../Controllers/studentController');
 
 const authMiddleware = require('../Middleware/authMiddleware');
+const upload = require('../Middleware/uploadMiddleware');
 
 router.use(authMiddleware);
-router.post('/', createStudent);
+router.post('/',upload.single('photograph'), createStudent);
 router.get('/', getAllStudents);
 router.get('/:id', getStudentById);
-router.put('/:id', updateStudent);
+router.put('/:id',upload.single('photograph'), updateStudent);
 router.delete('/:id', deleteStudent);
 
 module.exports = router;

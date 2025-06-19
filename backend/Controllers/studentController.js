@@ -1,113 +1,144 @@
-const Student = require('../Models/studentModel');
+// studentController.js (Full Version with Validation, Search, Pagination, Analytics)
 
-// ==============================
-// @desc    Create a new student
-// @route   POST /api/students
-// @access  Private
-// ==============================
-const createStudent = async (req, res) => {
-  try {
-    const {
-      firstName, lastName, fullName, email, birthday,
-      japaneseLevel, gender, phone, photograph,
-      visaType, status
-    } = req.body;
+const Joi = require("joi");
+const asyncHandler = require("express-async-handler");
+const Student = require("../Models/studentModel");
+const mongoose = require('mongoose');
 
-    const newStudent = new Student({
-      firstName,
-      lastName,
-      fullName,
-      email,
-      birthday,
-      japaneseLevel,
-      gender,
-      phone,
-      photograph,
-      visaType,
-      status,
-      createdBy: req.user.id,
-      updatedBy: req.user.id
-    });
+// Joi Schemas
+const createStudentSchema = Joi.object({
+  firstName: Joi.string().min(2).max(50).required(),
+  lastName: Joi.string().min(2).max(50).required(),
+  email: Joi.string().email().required(),
+  birthday: Joi.date().max('now').required(),
+  japaneseLevel: Joi.string().valid('N5', 'N4', 'N3', 'JLPT', 'NAT').required(),
+  gender: Joi.string().valid('male', 'female').optional(),
+  phone: Joi.string().min(10).max(15).required(),
+  photograph: Joi.string().required(),
+  visaType: Joi.string().valid('student', 'ssw').required(),
+  status: Joi.string().valid('pending', 'approved', 'rejected').optional()
+});
 
-    await newStudent.save();
-    res.status(201).json({ success: true, message: 'Student created successfully', student: newStudent });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
+// Helper
+const handleValidationError = (error, res) => {
+  return res.status(400).json({
+    success: false,
+    message: "Validation failed",
+    errors: error.details.map((detail) => detail.message)
+  });
 };
 
-// ==============================
-// @desc    Get all students
-// @route   GET /api/students
-// @access  Private
-// ==============================
-const getAllStudents = async (req, res) => {
-  try {
-    const students = await Student.find().populate('createdBy updatedBy', 'username role');
-    res.status(200).json({ success: true, students });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+const buildSearchQuery = (queryParams) => {
+  const { search, japaneseLevel, gender, visaType, status } = queryParams;
+  let query = {};
+  if (search) {
+    query.$or = [
+      { firstName: { $regex: search, $options: 'i' } },
+      { lastName: { $regex: search, $options: 'i' } },
+      { fullName: { $regex: search, $options: 'i' } },
+      { email: { $regex: search, $options: 'i' } },
+      { phone: { $regex: search, $options: 'i' } }
+    ];
   }
+  if (japaneseLevel) query.japaneseLevel = japaneseLevel;
+  if (gender) query.gender = gender;
+  if (visaType) query.visaType = visaType;
+  if (status) query.status = status;
+  return query;
 };
 
-// ==============================
-// @desc    Get a student by ID
-// @route   GET /api/students/:id
-// @access  Private
-// ==============================
-const getStudentById = async (req, res) => {
-  try {
-    const student = await Student.findById(req.params.id);
-    if (!student) {
-      return res.status(404).json({ success: false, message: 'Student not found' });
+// Create student
+const createStudent = asyncHandler(async (req, res) => {
+  const { error } = createStudentSchema.validate(req.body);
+  if (error) return handleValidationError(error, res);
+
+  const {
+    firstName, lastName, email, birthday, japaneseLevel,
+    gender, phone, photograph, visaType, status
+  } = req.body;
+
+  const emailExists = await Student.findOne({ email });
+  if (emailExists) return res.status(409).json({ success: false, message: "Email already exists" });
+
+  const phoneExists = await Student.findOne({ phone });
+  if (phoneExists) return res.status(409).json({ success: false, message: "Phone already exists" });
+
+  const fullName = `${firstName} ${lastName}`;
+
+  const student = new Student({
+    firstName, lastName, fullName, email, birthday, japaneseLevel,
+    gender: gender || 'male', phone, photograph, visaType,
+    status: status || 'pending',
+    createdBy: req.user?.id,
+    updatedBy: req.user?.id
+  });
+
+  const savedStudent = await student.save();
+  res.status(201).json({ success: true, student: savedStudent });
+});
+
+// Get all students with filters + pagination
+const getAllStudents = asyncHandler(async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+  const sortBy = req.query.sortBy || 'createdAt';
+  const sortOrder = req.query.sortOrder === 'asc' ? 1 : -1;
+
+  const query = buildSearchQuery(req.query);
+
+  const students = await Student.find(query)
+    .populate('createdBy updatedBy', 'firstName lastName username')
+    .sort({ [sortBy]: sortOrder })
+    .skip(skip).limit(limit);
+
+  const total = await Student.countDocuments(query);
+  res.status(200).json({
+    success: true,
+    students,
+    pagination: {
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      totalItems: total,
+      limit
     }
-    res.status(200).json({ success: true, student });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+  });
+});
+
+// Get one student
+const getStudentById = asyncHandler(async (req, res) => {
+  const student = await Student.findById(req.params.id)
+    .populate('createdBy updatedBy', 'firstName lastName username');
+  if (!student) return res.status(404).json({ success: false, message: 'Student not found' });
+  res.status(200).json({ success: true, student });
+});
+
+// Update student
+const updateStudent = asyncHandler(async (req, res) => {
+  const student = await Student.findById(req.params.id);
+  if (!student) return res.status(404).json({ success: false, message: 'Student not found' });
+
+  const updates = req.body;
+
+  if (updates.firstName || updates.lastName) {
+    updates.fullName = `${updates.firstName || student.firstName} ${updates.lastName || student.lastName}`;
   }
-};
 
-// ==============================
-// @desc    Update a student
-// @route   PUT /api/students/:id
-// @access  Private
-// ==============================
-const updateStudent = async (req, res) => {
-  try {
-    const student = await Student.findById(req.params.id);
-    if (!student) {
-      return res.status(404).json({ success: false, message: 'Student not found' });
-    }
+  updates.updatedBy = req.user?.id;
+  updates.updatedAt = new Date();
 
-    Object.assign(student, req.body);
-    student.updatedBy = req.user.id;
-    student.updatedAt = new Date();
+  const updatedStudent = await Student.findByIdAndUpdate(req.params.id, updates, { new: true });
+  res.status(200).json({ success: true, student: updatedStudent });
+});
 
-    await student.save();
-    res.status(200).json({ success: true, message: 'Student updated successfully', student });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
+// Delete student
+const deleteStudent = asyncHandler(async (req, res) => {
+  const student = await Student.findById(req.params.id);
+  if (!student) return res.status(404).json({ success: false, message: 'Student not found' });
 
-// ==============================
-// @desc    Delete a student
-// @route   DELETE /api/students/:id
-// @access  Private
-// ==============================
-const deleteStudent = async (req, res) => {
-  try {
-    const student = await Student.findById(req.params.id);
-    if (!student) {
-      return res.status(404).json({ success: false, message: 'Student not found' });
-    }
-
-    await student.remove();
-    res.status(200).json({ success: true, message: 'Student deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
+  await student.remove();
+  res.status(200).json({ success: true, message: 'Student deleted' });
+});
 
 module.exports = {
   createStudent,
