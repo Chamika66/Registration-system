@@ -2,24 +2,27 @@ const express = require('express');
 const router = express.Router();
 
 const {
-    createStudent, 
-    getAllStudents, 
-    getStudentById, 
-    updateStudent, 
-    deleteStudent
+  createStudent,
+  getAllStudents,
+  getStudentById,
+  updateStudent,
+  deleteStudent
 } = require('../Controllers/studentController');
 
-const authMiddleware = require('../Middleware/authMiddleware');
+const {authMiddleware} = require('../Middleware/authMiddleware');
 const upload = require('../Middleware/uploadMiddleware');
 
-// Apply auth middleware to all routes
+console.log('authMiddleware:', typeof authMiddleware);
+console.log('upload:', typeof upload);
+
+// Apply only authMiddleware globally
 router.use(authMiddleware);
 
-// Routes
-router.post('/', upload.single('photograph'), createStudent);
-router.get('/', getAllStudents);
-router.get('/:id', getStudentById);
-router.put('/:id', upload.single('photograph'), updateStudent);
-router.delete('/:id', deleteStudent);
+// Apply multer per route only when file is uploaded
+router.post('/',authMiddleware, upload.single('photograph'), createStudent);
+router.get('/',authMiddleware, getAllStudents);
+router.get('/:id',authMiddleware, getStudentById);
+router.put('/:id',authMiddleware, upload.single('photograph'), updateStudent);
+router.delete('/:id',authMiddleware, deleteStudent);
 
 module.exports = router;
