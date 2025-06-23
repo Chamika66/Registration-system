@@ -49,6 +49,11 @@ const buildSearchQuery = (queryParams) => {
 
 // Create student
 const createStudent = asyncHandler(async (req, res) => {
+
+  if (req.file) {
+    req.body.photograph = req.file.filename;
+  }
+  
   const { error } = createStudentSchema.validate(req.body);
   if (error) return handleValidationError(error, res);
 
