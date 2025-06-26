@@ -49,11 +49,11 @@ const studentSchema = new mongoose.Schema({
 
     createdBy: {
         type: mongoose.Schema.Types.ObjectId, 
-        ref: 'User'
+        ref: 'Profile'
     },
     updatedBy: {
         type: mongoose.Schema.Types.ObjectId, 
-        ref: 'User'
+        ref: 'Profile'
     },
     createdAt: {
         type: Date,

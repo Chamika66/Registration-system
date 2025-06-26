@@ -145,10 +145,45 @@ const deleteStudent = asyncHandler(async (req, res) => {
   res.status(200).json({ success: true, message: 'Student deleted' });
 });
 
+// ==============================
+// @desc    Dashboard statistics
+// @route   GET /api/students/stats
+// @access  Private
+// ==============================
+const getDashboardStats = asyncHandler(async (req, res) => {
+  const totalStudents = await Student.countDocuments();
+  const visaStats = await Student.aggregate([
+    { $group: { _id: "$visaType", count: { $sum: 1 } } }
+  ]);
+  const statusStats = await Student.aggregate([
+    { $group: { _id: "$status", count: { $sum: 1 } } }
+  ]);
+
+  const visaCount = visaStats.reduce((acc, item) => {
+    acc[item._id] = item.count;
+    return acc;
+  }, {});
+
+  const statusCount = statusStats.reduce((acc, item) => {
+    acc[item._id] = item.count;
+    return acc;
+  }, {});
+
+  res.status(200).json({
+    success: true,
+    stats: {
+      totalStudents,
+      visaType: visaCount,
+      status: statusCount
+    }
+  });
+});
+
 module.exports = {
   createStudent,
   getAllStudents,
   getStudentById,
   updateStudent,
-  deleteStudent
+  deleteStudent,
+  getDashboardStats
 };

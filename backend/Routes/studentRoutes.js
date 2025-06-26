@@ -6,7 +6,8 @@ const {
   getAllStudents,
   getStudentById,
   updateStudent,
-  deleteStudent
+  deleteStudent,
+  getDashboardStats
 } = require('../Controllers/studentController');
 
 const {authMiddleware} = require('../Middleware/authMiddleware');
@@ -21,6 +22,7 @@ router.use(authMiddleware);
 // Apply multer per route only when file is uploaded
 router.post('/',authMiddleware, upload.single('photograph'), createStudent);
 router.get('/',authMiddleware, getAllStudents);
+router.get('/stats', authMiddleware, getDashboardStats);
 router.get('/:id',authMiddleware, getStudentById);
 router.put('/:id',authMiddleware, upload.single('photograph'), updateStudent);
 router.delete('/:id',authMiddleware, deleteStudent);
