@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import './App.css'
-import LoginForm from './components/LoginForm'
+import { Button } from './components/ui/button';
 
 function App() {
+
   return (
     <>
-      <LoginForm /> 
+      <Button>Check</Button>
     </>
-  )
+  );
 }
 
 export default App
