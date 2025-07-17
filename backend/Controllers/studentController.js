@@ -92,6 +92,10 @@ const getAllStudents = asyncHandler(async (req, res) => {
 
   const query = buildSearchQuery(req.query);
 
+  if(req.query.filter && req.query.filter !== 'all') {
+    query.status = req.query.filter;
+  }
+
   const students = await Student.find(query)
     .populate('createdBy updatedBy', 'firstName lastName username')
     .sort({ [sortBy]: sortOrder })
@@ -169,12 +173,24 @@ const getDashboardStats = asyncHandler(async (req, res) => {
     return acc;
   }, {});
 
+  const visaStatusBreakdown = {
+    student: {
+      approved: await Student.countDocuments({ visaType: "student", status: "approved" }),
+      pending: await Student.countDocuments({ visaType: "student", status: "pending" }),
+    },
+    ssw: {
+      approved: await Student.countDocuments({ visaType: "ssw", status: "approved" }),
+      pending: await Student.countDocuments({ visaType: "ssw", status: "pending" }),
+    }
+  };
+
   res.status(200).json({
     success: true,
     stats: {
       totalStudents,
       visaType: visaCount,
-      status: statusCount
+      status: statusCount,
+      visaStatusBreakdown
     }
   });
 });
