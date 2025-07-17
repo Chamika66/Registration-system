@@ -63,7 +63,11 @@ const DashboardPage = () => {
         {searchResults.length > 0 && (
           <ul className="mt-4 space-y-2">
             {searchResults.map((student) => (
-              <li key={student._id} className="border p-2 rounded">
+              <li
+                key={student._id}
+                className="border p-2 rounded cursor-pointer hover:bg-gray-100"
+                onClick={() => navigate(`/students/${student._id}`)}
+              >
                 {student.fullName} - {student.visaType} ({student.status})
               </li>
             ))}

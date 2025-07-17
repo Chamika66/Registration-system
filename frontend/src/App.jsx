@@ -5,6 +5,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from './routes/ProtectedRoute';
 import AddStudentForm from './pages/AddStudentForm';
 import StudentListPage from './pages/StudentListPage';
+import StudentDetailPage from './pages/StudentDetailPage';
 
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />   
       <Route path="/add-student" element={<ProtectedRoute><AddStudentForm /></ProtectedRoute>} />
       <Route path="/students" element={<StudentListPage/>}/>
+      <Route path="/students/:id" element={<StudentDetailPage/>} />      
     </Routes>
   )
 }
