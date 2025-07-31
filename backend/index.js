@@ -16,8 +16,8 @@ app.use(cors({
 }));
 app.use(express.json());
 
+const path = require('path');
 app.use('/uploads', express.static('uploads'));
-
 
 
 app.use("/api/students", student);

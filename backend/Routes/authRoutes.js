@@ -21,7 +21,7 @@ const {
 
 router.post("/register", registerAdmin);
 router.post("/login", login);
-router.post("/addCoadmin", authMiddleware, isAdmin, addCoadmin);
+router.post("/add-coadmin", authMiddleware, isAdmin, addCoadmin);
 router.get("/profile", authMiddleware, getProfile);
 router.put("/profile", authMiddleware, updateProfile);
 router.put("/change-password", authMiddleware, changePassword);
