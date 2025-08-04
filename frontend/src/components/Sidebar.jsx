@@ -12,6 +12,7 @@ const AdminSidebar = () => {
     { label: "Approved Students", path: "/students?filter=approved" },
     { label: "Pending Students", path: "/students?filter=pending" },
     { label: "Rejected Students", path: "/students?filter=rejected" },
+    { label: "Change Password", path: "/change-password" },
   ];
 
   // Only admins can see this

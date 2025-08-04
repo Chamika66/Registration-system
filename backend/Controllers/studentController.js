@@ -82,6 +82,33 @@ const createStudent = asyncHandler(async (req, res) => {
   res.status(201).json({ success: true, student: savedStudent });
 });
 
+
+// ==============================
+// @desc    Suggest students by name
+// @route   GET /api/students/search
+// @access  Private
+// ==============================
+const searchStudentsByName = asyncHandler(async (req, res) => {
+  const { name } = req.query;
+
+  if (!name || name.trim() === "") {
+    return res.status(400).json({ success: false, message: "Name query is required" });
+  }
+
+  const regex = new RegExp(name, "i"); // case-insensitive
+
+  const students = await Student.find({
+    $or: [
+      { fullName: regex },
+      { firstName: regex },
+      { lastName: regex }
+    ]
+  }).limit(10); // limit results for performance
+
+  res.status(200).json({ success: true, students });
+});
+
+
 // Get all students with filters + pagination
 const getAllStudents = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page) || 1;
@@ -201,5 +228,6 @@ module.exports = {
   getStudentById,
   updateStudent,
   deleteStudent,
-  getDashboardStats
+  getDashboardStats,
+  searchStudentsByName
 };

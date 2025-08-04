@@ -7,7 +7,8 @@ const {
   getStudentById,
   updateStudent,
   deleteStudent,
-  getDashboardStats
+  getDashboardStats,
+  searchStudentsByName
 } = require('../Controllers/studentController');
 
 const {authMiddleware} = require('../Middleware/authMiddleware');
@@ -26,5 +27,7 @@ router.get('/stats', getDashboardStats);
 router.get('/:id', getStudentById);
 router.put('/:id', authMiddleware, upload.single('photograph'), updateStudent);
 router.delete('/:id',authMiddleware, deleteStudent);
+router.get("/search", authMiddleware, searchStudentsByName);
+
 
 module.exports = router;

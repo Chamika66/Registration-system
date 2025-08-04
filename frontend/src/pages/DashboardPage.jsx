@@ -99,29 +99,41 @@ const DashboardPage = () => {
         />
       </div>
 
-      {/* Visa Type Chart */}
-      <div className="bg-white shadow-md rounded-lg p-4 mb-6">
-        <h2 className="text-lg font-semibold mb-4">Visa Type Chart</h2>
-        {stats?.visaType ? (
-          <DashboardChart visaType={stats.visaType} />
-        ) : (
-          <p>No visa data available.</p>
-        )}
-      </div>
+      {/* All Charts in One Horizontal Line */}
+<div className="flex flex-col md:flex-row gap-4">
+  {/* Visa Type Chart */}
+  <div className="bg-white shadow-md rounded-lg p-4 w-full md:w-1/3">
+    <h2 className="text-lg font-semibold mb-4">Visa Type Chart</h2>
+    {stats?.visaType ? (
+      <DashboardChart visaType={stats.visaType} />
+    ) : (
+      <p>No visa data available.</p>
+    )}
+  </div>
 
-      {/* Visa Status Pie Charts */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
-        <VisaStatusChart
-          title="Student Visa Status"
-          approved={stats?.visaStatusBreakdown?.student?.approved || 0}
-          pending={stats?.visaStatusBreakdown?.student?.pending || 0}
-        />
-        <VisaStatusChart
-          title="SSW Visa Status"
-          approved={stats?.visaStatusBreakdown?.ssw?.approved || 0}
-          pending={stats?.visaStatusBreakdown?.ssw?.pending || 0}
-        />
-      </div>
+  {/* Student Visa Status */}
+  <div className="bg-white shadow-md rounded-lg p-4 w-full md:w-1/3">
+    <h2 className="text-lg font-semibold mb-4">Student Visa Status</h2>
+    <VisaStatusChart
+      title=""
+      approved={stats?.visaStatusBreakdown?.student?.approved || 0}
+      pending={stats?.visaStatusBreakdown?.student?.pending || 0}
+    />
+  </div>
+
+  {/* SSW Visa Status */}
+  <div className="bg-white shadow-md rounded-lg p-4 w-full md:w-1/3">
+    <h2 className="text-lg font-semibold mb-4">SSW Visa Status</h2>
+    <VisaStatusChart
+      title=""
+      approved={stats?.visaStatusBreakdown?.ssw?.approved || 0}
+      pending={stats?.visaStatusBreakdown?.ssw?.pending || 0}
+    />
+  </div>
+</div>
+
+
+      
     </div>
   );
 };
