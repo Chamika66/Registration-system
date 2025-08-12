@@ -31,6 +31,15 @@ const studentSchema = new mongoose.Schema({
         minlength: 10,
         maxlength: 15,
     },
+    parentsName: {type:String,
+        required: true,
+    },
+    parentsPhone: {
+        type: String,
+        required: true,
+        minlength: 10,
+        maxlength: 15,
+    },
     photograph: {
         type: String,
         required: true,

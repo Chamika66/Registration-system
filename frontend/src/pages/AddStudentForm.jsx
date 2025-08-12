@@ -95,6 +95,14 @@ const AddStudentForm = () => {
           <input name="phone" value={formData.phone} onChange={handleChange} required className="w-full p-2 border rounded" />
         </div>
         <div>
+          <label className="block mb-1">Parents Name</label>
+          <input name="parentsName" value={formData.parentsName} onChange={handleChange} required className="w-full p-2 border rounded" />
+        </div>
+        <div>
+          <label className="block mb-1">Parents Phone</label>
+          <input name="parentsPhone" value={formData.parentsPhone} onChange={handleChange} required className="w-full p-2 border rounded" />
+        </div>
+        <div>
           <label className="block mb-1">Photograph</label>
           <input type="file" name="photograph" onChange={handleChange} accept="image/*" required className="w-full p-2 border rounded" />
         </div>

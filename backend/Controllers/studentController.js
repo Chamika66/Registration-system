@@ -14,6 +14,8 @@ const createStudentSchema = Joi.object({
   japaneseLevel: Joi.string().valid('N5', 'N4', 'N3', 'JLPT', 'NAT').required(),
   gender: Joi.string().valid('male', 'female').optional(),
   phone: Joi.string().min(10).max(15).required(),
+  parentsName: Joi.string().min(2).max(50).required(),
+  parentsPhone: Joi.string().min(10).max(15).required(),
   photograph: Joi.string().required(),
   visaType: Joi.string().valid('student', 'ssw').required(),
   status: Joi.string().valid('pending', 'approved', 'rejected').optional()
