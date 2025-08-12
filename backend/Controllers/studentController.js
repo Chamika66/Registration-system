@@ -13,11 +13,11 @@ const createStudentSchema = Joi.object({
   birthday: Joi.date().max('now').required(),
   japaneseLevel: Joi.string().valid('N5', 'N4', 'N3', 'JLPT', 'NAT').required(),
   gender: Joi.string().valid('male', 'female').optional(),
-  phone: Joi.string().min(10).max(15).required(),
+  phone: Joi.string().min(10).max(15).required(), 
   parentsName: Joi.string().min(2).max(50).required(),
   parentsPhone: Joi.string().min(10).max(15).required(),
   photograph: Joi.string().required(),
-  visaType: Joi.string().valid('student', 'ssw').required(),
+  visaType: Joi.string().valid('student', 'ssw','training').required(),
   status: Joi.string().valid('pending', 'approved', 'rejected').optional()
 });
 
@@ -61,7 +61,7 @@ const createStudent = asyncHandler(async (req, res) => {
 
   const {
     firstName, lastName, email, birthday, japaneseLevel,
-    gender, phone, photograph, visaType, status
+    gender, phone, parentsName, parentsPhone, photograph, visaType, status
   } = req.body;
 
   const emailExists = await Student.findOne({ email });
@@ -74,7 +74,7 @@ const createStudent = asyncHandler(async (req, res) => {
 
   const student = new Student({
     firstName, lastName, fullName, email, birthday, japaneseLevel,
-    gender: gender || 'male', phone, photograph, visaType,
+    gender: gender || 'male', phone, parentsName, parentsPhone, photograph, visaType,
     status: status || 'pending',
     createdBy: req.user?.id,
     updatedBy: req.user?.id
